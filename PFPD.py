@@ -1,28 +1,50 @@
-from model import progression_scoring, diagnosing
+from model.diagnosing import diagnosing
+from model.optimize_state import compute_total_decision
+from model.progression_scoring import progression_scoring
 
+from recommend import prepare_recommendation_items, retrieve_guidelines_for_items
+from llm_writer import generate_patient_recommendation
+import pandas as pd
 
 class PFPD():
-    def __init__(self, X):
+    def __init__(self):
         
-        X_life=X[['wk_smk',
-        'wk_alc', 'wk_mvpa_work', 'wk_mvpa_play', 'wk_walk', 'wk_sleep',
-        'stress', 'wk_break', 'wk_lunch', 'wk_dinner', 'wk_veg1', 'wk_veg2',
-        'wk_fruit']]
 
-        X_demo=X[['sex', 'age', 'edu', 'income', 'job']]
+        import pickle
 
-        X_lab=X[['chol', 'hdl', 'tg', 'ldl', 'sbp', 'wt', 'ht', 'wc', 'bmi']]
+        with open("model_paths.pkl", "rb") as f:
+            self.model_paths = pickle.load(f)
 
-        glu=X['glu']
-        hba1c=X['hba1c']
-        
-    def dbs_progression(X):
-        result=progression_scoring(X)
+        with open("scalers.pkl", "rb") as f:
+            self.scalers = pickle.load(f)
+
+
+    def dbs_progression(self,X):
+        X1=pd.DataFrame([X])
+        result=progression_scoring(X1,self.model_paths, self.scalers)
         return result
     
-    def dbs_diagnosis(X):
-        diagnosis=diagnosing(X)
-        return diagnosis
+    def apply_deltas(self, X, deltas):
+        X_opt = X.copy()
+
+        for col, tup in deltas.items():
+            delta=tup[0]
+            if col in X_opt.columns:
+                X_opt[col] = X_opt[col] + delta
+
+        return X_opt
     
-    def lifestyle_rec(X):
-        return
+    def lifestyle_rec(self,X):
+        X3=pd.DataFrame([X])
+        deltas=compute_total_decision(X3,self.model_paths,self.scalers)
+        X_opt=self.apply_deltas(X3,deltas)
+        final_score=progression_scoring(X_opt,self.model_paths,self.scalers)
+        return deltas, final_score
+    
+    def make_patient_friendly_recommendation(self,X: dict, deltas: dict):
+        items = prepare_recommendation_items(X, deltas, top_k=8)
+        retrieved_context = retrieve_guidelines_for_items(items)
+        final_text = generate_patient_recommendation(X, retrieved_context)
+        return final_text
+    
+    

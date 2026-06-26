@@ -19,7 +19,7 @@ def diagnosing(X):
         scaled_probs /= scaled_probs.sum(axis=1, keepdims=True)
         return scaled_probs
     
-    loaded = joblib.load("models2.pkl")
+    loaded = joblib.load("C:/Users/cmc/Desktop/T2D_AI_research/model/models.pkl")
 
     scaler = loaded["scaler"]
     model1 = loaded["model1"]

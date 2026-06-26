@@ -1,51 +1,51 @@
-def progression_scoring(X):
+def progression_scoring(X,model_paths,scalers):
+    import torch.nn as nn
+    import torch
     import numpy as np
-    import pandas as pd
-    import joblib
+    from .MLP_model import LitModel1
+
+
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
     
-    X_life=X[['wk_smk',
-    'wk_alc', 'wk_mvpa_work', 'wk_mvpa_play', 'wk_walk', 'wk_sleep',
-    'stress', 'wk_break', 'wk_lunch', 'wk_dinner', 'wk_veg1', 'wk_veg2',
-    'wk_fruit']]
 
-    X_demo=X[['sex', 'age', 'edu', 'income', 'job']]
-
-    X_lab=X[['chol', 'hdl', 'tg', 'ldl', 'sbp', 'wt', 'ht', 'wc', 'bmi']]
-
-    glu=X['glu']
-    hba1c=X['hba1c']
+    all_probs = []
     
-    
-    loaded = joblib.load("models.pkl")
+    for model_path, scaler in zip(model_paths, scalers):
 
-    scaler = loaded["scaler"]
-    model1 = loaded["model1"]
-    model2 = loaded["model2"]
-    model3 = loaded["model3"]
-    meta_model = loaded["meta_model"]
+        # 1. 모델 로드
+        model = LitModel1.load_from_checkpoint(model_path)
+        model.to(device)
+        model.eval()
 
-    z1_test = model1.predict_proba(X_life) @ np.array([0,1,2])
-    z2_test = model2.predict_proba(X_demo) @ np.array([0,1,2])
-    z3_test = model3.predict_proba(X_lab)  @ np.array([0,1,2])
+        # 2. test scaling
+        X_test_scaled = scaler.transform(X)
 
+        # 3. tensor 변환
+        X_test_tensor = torch.tensor(
+            X_test_scaled,
+            dtype=torch.float32
+        ).to(device)
 
-    meta_test = pd.DataFrame({
-    "z1": z1_test,
-    "z2": z2_test,
-    "z3": z3_test,
-    "glu": glu,
-    "hba1c": hba1c
-    })
+        # 4. prediction
+        with torch.no_grad():
 
-    meta_test_scaled = scaler.transform(meta_test)
+            logits = model(X_test_tensor)
 
-    y_proba_test = meta_model.predict_proba(meta_test_scaled)
+            # softmax probability
+            probs = torch.softmax(logits/3, dim=1)
 
-    severity_test = y_proba_test @ np.array([0,1,2])
-    severity_test*=50
-    
-    return severity_test
-    
-    
-    
-    
+            probs = probs.cpu().numpy()
+
+        all_probs.append(probs)
+
+    # =========================
+    # 평균 probability
+    # =========================
+
+    mean_probs = np.mean(all_probs, axis=0)
+
+    # 최종 prediction
+    y_pred = mean_probs[0][1]+2*mean_probs[0][2]
+
+    return y_pred*50

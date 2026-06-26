@@ -1,0 +1,192 @@
+import torch
+import numpy as np
+from model.MLP_model import LitModel1
+
+import torch.cuda
+import torch
+from collections import defaultdict
+
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+def optimize_with_mlp(
+    model, scaler, x0_np, columns, device="cuda",
+    lr=0.01, steps=300, lambda_reg=0.01,
+    fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','wt','bmi','chol','hdl','tg','ldl','ht','wc'],
+    clamp_dict = {
+    'wk_smk': (0.0, 420.0),
+    'wk_alc': (0.0, 40.0),
+    'wk_mvpa_play': (0.0, 1470.0),
+    'wk_walk': (10.0, 3780.0),
+    'wk_sleep': (60.0, 1260.0),
+    'stress': (1.0, 4.0),
+    'wk_break': (0.0, 6.0),
+    'wk_lunch': (0.0, 6.0),
+    'wk_dinner': (0.0, 6.0),
+    'wk_veg1': (0.0, 21.0),
+    'wk_veg2': (0.0, 21.0),
+    'wk_fruit': (0.0, 21.0),
+    }
+):
+    direction_constraints = {
+    "wk_walk": "increase",
+    "stress": "decrease",
+    "wk_alc": "decrease",
+    "wk_smk": "decrease",
+    "wk_veg1": "increase",
+    "wk_veg2": "increase",
+    }
+
+    model.eval()
+    x0_np = np.array(x0_np.values if hasattr(x0_np, "values") else x0_np).reshape(1, -1)
+
+    x0 = torch.tensor(scaler.transform(x0_np), dtype=torch.float32, device=device)
+    x = x0.clone().detach().requires_grad_(True)
+
+    mask = torch.ones_like(x)
+    for i, c in enumerate(columns):
+        if c in fixed_features:
+            mask[0, i] = 0.
+
+    for _ in range(steps):
+
+        if x.grad is not None:
+            x.grad.zero_()
+
+        y = model(x)
+        loss = 5*y[:, -1].mean() + lambda_reg * torch.norm(x - x0, p=1)
+        loss.backward()
+
+        with torch.no_grad():
+
+            x -= lr * (x.grad * mask)
+
+            for i, c in enumerate(columns):
+
+                if c in fixed_features:
+                    x[0, i] = x0[0, i]
+                
+                if c in direction_constraints:
+
+                    if direction_constraints[c] =='increase':
+                        x[0, i] = torch.maximum(x[0, i], x0[0, i])
+
+                    elif direction_constraints[c]=='decrease':
+                        x[0, i] = torch.minimum(x[0, i], x0[0, i])
+
+                if clamp_dict and c in clamp_dict:
+
+                    lo, hi = clamp_dict[c]
+
+                    lo = (lo - scaler.mean_[i]) / scaler.scale_[i]
+                    hi = (hi - scaler.mean_[i]) / scaler.scale_[i]
+
+                    x[0, i] = torch.clamp(x[0, i], lo, hi)
+
+    return scaler.inverse_transform(x.detach().cpu().numpy())
+
+def get_feature_deltas(
+    x0,
+    x_opt,
+    columns,
+    fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','wt','bmi','chol','hdl','tg','ldl','ht','wc'],
+    tol=1e-6
+    ):
+
+    x0 = np.array(x0).reshape(-1)
+    x_opt = np.array(x_opt).reshape(-1)
+
+    deltas = {}
+
+    for i, col in enumerate(columns):
+        if col in fixed_features:
+            continue
+
+        diff = x_opt[i] - x0[i]
+
+        if abs(diff) > tol:
+            deltas[col] = float(diff)
+
+    return deltas
+
+def get_rank(deltas):
+    inv = {
+    'wk_smk': (0.0, 420.0),
+    'wk_alc': (0.0, 40.0),
+    'wk_mvpa_play': (0.0, 1470.0),
+    'wk_walk': (10.0, 3780.0),
+    'wk_sleep': (60.0, 1260.0),
+    'stress': (1.0, 4.0),
+    'wk_break': (0.0, 6.0),
+    'wk_lunch': (0.0, 6.0),
+    'wk_dinner': (0.0, 6.0),
+    'wk_veg1': (0.0, 21.0),
+    'wk_veg2': (0.0, 21.0),
+    'wk_fruit': (0.0, 21.0),
+    }
+
+    inv2={}
+    for k,v in deltas.items():
+        min,max=inv[k]
+        prop=v/(max-min) #변수들마다 스케일이 다르므로 정규화시킨다
+        inv2[k]=(v,prop)
+
+    sorted_items = sorted(
+        inv2.items(),
+        key=lambda x: abs(x[1][1]),  # 튜플의 두 번째 원소(비율)
+        reverse=True
+    )
+
+    # rank 추가
+    ranked_deltas = {}
+
+    for rank, (k, (value, ratio)) in enumerate(sorted_items, start=1):
+        ranked_deltas[k] = (value, ratio, rank)
+
+    return ranked_deltas
+
+    
+
+
+
+def compute_total_decision(X,model_paths,scalers):
+
+    total_deltas=[]
+    x0 = X.iloc[[0]].values
+    columns = X.columns.tolist()
+
+    for i in range(5):
+        best_model = LitModel1.load_from_checkpoint(model_paths[i])
+        best_model.to(device)
+
+        best_scaler = scalers[i]
+
+        x_opt = optimize_with_mlp(
+            model=best_model,
+            scaler=best_scaler,
+            x0_np=x0,
+            columns=columns,
+            device=device
+        )
+
+        deltas = get_feature_deltas(
+            x0=x0,
+            x_opt=x_opt,
+            columns=X.columns.tolist()
+        )
+        total_deltas.append(deltas)
+
+    mean_deltas = defaultdict(list)
+
+    for d in total_deltas:
+        for k, v in d.items():
+            mean_deltas[k].append(v)
+
+    mean_deltas = {
+        k: np.mean(v).round(2)
+        for k, v in mean_deltas.items()
+    }
+    
+    ranked_deltas=get_rank(mean_deltas)
+
+    return ranked_deltas

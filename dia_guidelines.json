@@ -1,0 +1,70 @@
+[
+  {
+    "id": "ada_mvpa_001",
+    "var": "wk_mvpa_play",
+    "reference": "The diabetes prevention program, section 3, ADA Standards of Care (2026)",
+    "text":"At least 150 minutes per week of moderate-intensity physical activity is recommended for diabetes prevention. Participants were encouraged to distribute physical activity throughout the week with a minimum frequency of three times per week and at least 10 min per session. Physical activity should produce a 700 kcal/week energy deficit to reduce body weight. In addition to aerobic activity, a physical activity plan designed to prevent diabetes can include resistance training. Breaking up prolonged sedentary time may also be encouraged, as it lowers postprandial glucose levels."
+  },
+  {
+    "id": "ada_walk_001",
+    "var": "wk_walk",
+    "reference": "The diabetes prevention program, section 3, ADA Standards of Care (2026)",
+    "text":"Breaking up prolonged sedentary time may also be encouraged, as it lowers postprandial glucose levels"
+  },
+  {
+    "id": "ada_diet_001",
+    "var": ["wk_break","wk_lunch","wk_dinner"],
+    "reference": "Nutrition, section 3, ADA Standards of Care (2026)",
+    "text": "A variety of eating patterns is recommended, including Mediterranean-style, plant-based, and low-carbohydrate. Grains, legumes, nuts, moderate amount of fruits, vegetables and minimal processed foods are effective for diabetes prevention. "
+  },
+  {
+    "id": "ada_sleep_001",
+    "var": "wk_sleep",
+    "reference": "Sleep Characteristics Associated With Increased Risk of Type 2 Diabetes, section 3, ADA Standards of Care (2026)",
+    "text": "Sleep can be characterized using three key constructs: quantity, quality, and timing. For association between sleep duration and diabetes incidence, with 7 h per day has the lowest incidence, with short (typically defined as <6 h) and long (typically defined as >9 h) sleep duration having up to a high risk of type 2 diabetes. Poor overall sleep quality was associated with high risk of developing diabetes. Individuals with a preference for evenings (i.e., going to bed late and getting up late), there was a higher risk for diabetes than for those with a preference for mornings"
+  },
+
+
+  {
+    "id": "ada_smk_001",
+    "var": "wk_smk",
+    "reference": "Smoking cessation, section 5, ADA Standards of Care (2026)",
+    "text": "Smoking cessation is recommended, since it can reduce the risk of CVD and all-cause mortality. As the time since quitting smoking increases, the risk for type 2 diabetes decreases."
+  },
+  {
+    "id": "ada_alc_001",
+    "var": "wk_alc",
+    "reference": "Medical Nutrition Therapy - Nutrition recommendations, section 5, ADA Standards of Care (2026)",
+    "text": "Alcohol intake should not exceed the recommended daily limits. Alcohol abstainers are not recommended to start drinking alcohol, even in moderation."
+  },
+  {
+    "id": "ada_diet_002",
+    "var": ["wk_break","wk_lunch","wk_dinner"],
+    "reference": "Medical Nutrition Therapy - Nutrition Behaviors to encourage, section 5, ADA Standards of Care (2026)",
+    "text": "Regular consumption of heart-healthy wild-caught fatty fish such as salmon, tuna, sardines, and mackerel is encouraged. Fresh, frozen, or low-sodium canned are all acceptable options. It is recommended to minimize the consumption of red meat, sugar-sweetened beverages, sweets, refined grains, and processed and ultraprocessed foods. Water should be the primary beverage of choice. Intake of Legumes, including dried beans, peas, and lentils, is encouraged."
+  },
+  {
+    "id": "ada_diet_003",
+    "var": ["wk_break","wk_lunch","wk_dinner"],
+    "reference": "Medical Nutrition Therapy - Nutrition Behaviors to encourage, section 5, ADA Standards of Care (2026)",
+    "text": "Use herbs (e.g., basil, fennel, mint, parsley, rosemary, and thyme) and spices (e.g., cinnamon, garam masala, ginger, pepper, and turmeric) to season foods instead of salt or salt-containing preparations. Incorporate onions, garlic, celery, carrots, and other vegetables as a base for preparing various homemade foods. Cook with vegetable oil (e.g., avocado, canola, and olive) in place of fats high in saturated fat (e.g., butter, coconut oil, lard, and shortening). Plan out meals for the week. Grocery shop using a list. Cook on a day off so there are ready-to-eat and ready-to-reheat homemade meals waiting in the fridge or freezer. Include family or roommates in meal preparation; share the responsibilities of grocery shopping and cooking and use time off for meal preparation in advance when possible."
+  },
+  {
+    "id": "ada_veg1_001",
+    "var": ["wk_veg1","wk_veg2"], 
+    "reference": "Medical Nutrition Therapy, section 5, ADA Standards of Care (2026)",
+    "text": "Especially nonstarchy vegetables that are dark green, red, and orange in color; fresh, frozen, or low-sodium canned are all acceptable vegetable options."
+  },
+  {
+    "id": "ada_fruit_001",
+    "var": "wk_fruit", 
+    "reference": "Medical Nutrition Therapy, section 5, ADA Standards of Care (2026)",
+    "text": "Especially whole fruit—fresh, frozen, or canned in own juice (or no added sugar) are all acceptable fruit options."
+  },
+  {
+    "id": "ada_stress_001",
+    "var": "stress", 
+    "reference": "Psychological Care, section 5, ADA Standards of Care (2026)",
+    "text": "Diabetes stress, anxiety, and depression should be controlled in prediabetes patients, since they can significantly increase the A1C level and decrease the quality of life."
+  }
+]
