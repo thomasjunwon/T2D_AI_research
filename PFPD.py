@@ -5,17 +5,24 @@ from model.progression_scoring import progression_scoring
 from recommend import prepare_recommendation_items, retrieve_guidelines_for_items
 from llm_writer import generate_patient_recommendation
 import pandas as pd
+from pathlib import Path
+import pickle
+
+
 
 class PFPD():
     def __init__(self):
         
 
-        import pickle
+        BASE_DIR = Path(__file__).resolve().parent
 
-        with open("model_paths.pkl", "rb") as f:
-            self.model_paths = pickle.load(f)
+        self.model_paths = [
+            str(BASE_DIR / "model" / "final_checkpoints" / f"fold_{i}" / "best-checkpoint-v4.ckpt")
+            for i in range(5)
+        ]
 
-        with open("scalers.pkl", "rb") as f:
+        # scaler 로드
+        with open(BASE_DIR / "scalers.pkl", "rb") as f:
             self.scalers = pickle.load(f)
 
 

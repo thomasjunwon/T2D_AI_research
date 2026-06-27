@@ -3,7 +3,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
-client = OpenAI()
+#client = OpenAI()
 
 
 def generate_patient_recommendation(patient, retrieved_context):
@@ -54,7 +54,7 @@ Return JSON only.
             "additionalProperties": False
         }
     }
-    
+    """
     response = client.responses.create(
         model="gpt-4.1-mini",
         input=[
@@ -70,10 +70,10 @@ Return JSON only.
             }
         }
     )
-    
-
-    return json.loads(response.output_text)
     """
+
+    #return json.loads(response.output_text)
+    
     return {
     "summary":"테스트",
     "action_items":[
@@ -84,4 +84,5 @@ Return JSON only.
             "safety_note":"2~3일 동안 나눠서 운동하세요"
         }
     ]
-    """
+    }
+    

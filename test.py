@@ -43,6 +43,6 @@ deltas, final_score = pro.lifestyle_rec(X)
 print(f"recommend: {deltas}")
 print(f"final score: {final_score}")
 
-print(f"guideline: {pro.make_patient_friendly_recommendation(X,deltas)}")
+#print(f"guideline: {pro.make_patient_friendly_recommendation(X,deltas)}")
 
 
