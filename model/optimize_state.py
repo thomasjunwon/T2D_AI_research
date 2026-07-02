@@ -18,7 +18,7 @@ def optimize_with_mlp(
     'wk_alc': (0.0, 40.0),
     'wk_mvpa_play': (0.0, 1470.0),
     'wk_walk': (10.0, 3780.0),
-    'wk_sleep': (60.0, 1260.0),
+    'wk_sleep': (360.0, 540.0),  #constraint
     'stress': (1.0, 4.0),
     'wk_break': (0.0, 6.0),
     'wk_lunch': (0.0, 6.0),
@@ -187,6 +187,6 @@ def compute_total_decision(X,model_paths,scalers):
         for k, v in mean_deltas.items()
     }
     
-    ranked_deltas=get_rank(mean_deltas)
+    #ranked_deltas=get_rank(mean_deltas)
 
-    return ranked_deltas
+    return mean_deltas

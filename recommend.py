@@ -1,90 +1,116 @@
-# recommend.py
-"""
-VARIABLE_MAP = {
-
-    "wk_walk": "physical_activity",
-    "wk_mvpa_play": "physical_activity",
-
-    "wk_break": "diet",
-    "wk_lunch": "diet",
-    "wk_dinner": "diet",
-    "wk_veg1": "diet",
-    "wk_veg2": "diet",
-    "fruit": "diet",
-
-    "wk_smk": "smoking",
-
-    "wk_alc": "alcohol",
-
-    "stress": "stress",
-
-    "wk_sleep" : "sleep"
-}
-
-
-def map_variable_to_group(var_name: str) -> str: #delta 변수 이름 입력 -> 변수의 group 출력
-    name = var_name.lower()
-
-    for key, group in VARIABLE_MAP.items():
-        if key in name:
-            return group
-
-    return "general"
-"""
-
-# recommend.py
-
 def safety_adjust_delta(patient: dict, var: str, delta: float):
     current_value = patient.get(var, None)
-    #group = map_variable_to_group(variable)
 
     adjusted_delta = delta
-    safety_note = ""
 
-    # 운동: 과도한 증가량 완화
     if var == "wk_mvpa_play":
-        if delta > 150:
-            adjusted_delta = 150
-            safety_note = "The recommended increase in physical activity has been adjusted to promote gradual progression toward 150 minutes per week."
-
-    # 흡연: delta 숫자보다 금연 권고로 표현
-    if var == "smoking":
-        safety_note = "Smoking-related recommendations focus on smoking cessation or reduction rather than a specific quantitative target."
+        if delta < 0 or current_value >= 150:
+            adjusted_delta = 0
     
-    if var=="stress":
-        if delta < 1:
-            stress_level = "slight"
-
-        elif delta < 2:
-            stress_level = "moderate"
-
+    if var == "wk_walk":
+        if delta < 0 or current_value >= 420:  #근거: 하루에 1시간 까지가 이점이 존재한다
+            adjusted_delta = 0
+    
+    if var in ["wk_break", "wk_lunch", "wk_dinner", "wk_fruit"]:
+        if delta < 0:
+            adjusted_delta = 0 
+            
+    if var == "wk_fruit":
+        if current_value >= 14:        #7번보다 많이 먹으면 안된다는 근거?
+            adjusted_delta = 0
+    
+    if var in ["wk_veg1", "wk_veg2"]:
+        if current_value >= 14:
+            adjusted_delta = 0
+    
+    if var =="wk_alc":
+        if abs(delta) < 1:
+            adjusted_delta=0
+            
+    if var == "wk_sleep":
+        if current_value < 360:
+            adjusted_delta = min(60, 360 - current_value)
+        elif current_value > 540:
+            adjusted_delta = max(-60, 540 - current_value)
+        elif 360 <= current_value <= 540:
+            adjusted_delta = 0
+            
+    if var == "wk_smk":
+        if delta < 0:
+            adjusted_delta = -1 
         else:
-            stress_level = "high"
-
-        safety_note=f"Recommended adjustment intensity: {stress_level}"
-
+            adjusted_delta = 0
+    
     return {
         "variable": var,
         "original_delta": delta,
         "adjusted_delta": adjusted_delta,
         "current_value": current_value,
-        "safety_note": safety_note
     }
 
 
-def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8): 
-    items = []  #리스트 안에 delta 변수들에 note랑 original value 달아서 저장
+def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8, min_abs_ratio: float = 0.01):
+    """
+    deltas: {"wk_mvpa_play": 50.4, "stress": -2.0, ...}
+    top_k: normalized absolute delta 기준 상위 변수 개수
+    min_abs_ratio: 너무 작은 변화량 제거 기준
+    """
 
+    inv = {
+        'wk_smk': (0.0, 420.0),
+        'wk_alc': (0.0, 40.0),
+        'wk_mvpa_play': (0.0, 1470.0),
+        'wk_walk': (10.0, 3780.0),
+        'wk_sleep': (60.0, 1260.0),
+        'stress': (1.0, 4.0),
+        'wk_break': (0.0, 6.0),
+        'wk_lunch': (0.0, 6.0),
+        'wk_dinner': (0.0, 6.0),
+        'wk_veg1': (0.0, 21.0),
+        'wk_veg2': (0.0, 21.0),
+        'wk_fruit': (0.0, 21.0),
+    }
 
-    for var, val in list(deltas.items())[:top_k]:
-        delta = val[0]
+    ranked = []
 
-        item = safety_adjust_delta(patient, var, float(delta))
+    for var, delta in deltas.items():
+
+        delta = float(delta)
+        min_val, max_val = inv[var]
+        scale = max_val - min_val
+
+        ratio = delta / scale
+
+        # 너무 작은 변화는 제외
+        if abs(ratio) < min_abs_ratio:
+            continue
+
+        ranked.append((var, delta, ratio))
+
+    ranked = sorted(
+        ranked,
+        key=lambda x: abs(x[2]),
+        reverse=True
+    )
+
+    items = []
+
+    for rank, (var, delta, ratio) in enumerate(ranked, start=1):
+        item = safety_adjust_delta(patient, var, delta)
+        
+        if item["adjusted_delta"] == 0:
+            continue
+    
+        item["ratio"] = ratio
+        item["rank"] = rank
         items.append(item)
+        
+        if len(items)>=top_k:
+            break
 
     return items
 
-# recommend.py
+
 
 import chromadb
 
@@ -94,15 +120,38 @@ def get_ada_collection(persist_path="./chroma_dia"): #chroma_ada에서 가이드
     return client.get_or_create_collection(name="dia_guidelines")
 
 
-def retrieve_guidelines_for_items(items, persist_path="./chroma_dia", n_results=2):
+def retrieve_guidelines_for_items(items, persist_path="./chroma_dia", n_results=3):
     collection = get_ada_collection(persist_path)
 
     retrieved = []
+    VARIABLE_DESCRIPTION = {
+    "wk_break": "Number of days you eat breakfast each week",
+    "wk_lunch": "Number of days you eat lunch each week",
+    "wk_dinner": "Number of days you eat dinner each week",
+
+    "wk_mvpa_play": "Weekly minutes of moderate-to-vigorous physical activity",
+
+    "wk_walk": "Weekly minutes of walking",
+
+    "wk_sleep": "Average daily sleep duration (minutes)",
+
+    "wk_fruit": "Weekly frequency of fruit consumption",
+
+    "wk_veg1": "Weekly frequency of consuming vegetables, mushrooms, and seaweed, including kimchi and pickled vegetables",
+
+    "wk_veg2": "Weekly frequency of consuming vegetables, mushrooms, and seaweed, excluding kimchi and pickled vegetables",
+
+    "stress": "Self-reported stress level, from 1 to 4",
+    
+    "wk_alc": "Weekly alcohol consumption (cups per week)",
+    
+    "wk_smk": "Weekly frequency of smoking"
+    }
 
     for item in items:
         var = item["variable"]
 
-        query_text = f"Clinical guidelines for {var} in prediabetes prevention"
+        query_text = VARIABLE_DESCRIPTION[item["variable"]]
 
         results = collection.query(
             query_texts=[query_text],
@@ -114,7 +163,13 @@ def retrieve_guidelines_for_items(items, persist_path="./chroma_dia", n_results=
         metas = results.get("metadatas", [[]])[0]
 
         retrieved.append({
-            "item": item,
+            "item": {
+                "variable": item["variable"],
+                "description": VARIABLE_DESCRIPTION[item["variable"]],
+                "current_value": item["current_value"],
+                "recommended_delta": item["adjusted_delta"],
+                "recommended_value": item["current_value"] + item["adjusted_delta"],
+            },
             "guidelines": [
                 {
                     "text": doc,

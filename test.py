@@ -1,6 +1,10 @@
 from PFPD import PFPD
 import pandas as pd
 
+import sys
+
+sys.stdout.reconfigure(encoding="utf-8")
+
 
 X = {
     "sex": 2.0,
@@ -43,6 +47,6 @@ deltas, final_score = pro.lifestyle_rec(X)
 print(f"recommend: {deltas}")
 print(f"final score: {final_score}")
 
-#print(f"guideline: {pro.make_patient_friendly_recommendation(X,deltas)}")
+pro.make_patient_friendly_recommendation(X,deltas)
 
 
