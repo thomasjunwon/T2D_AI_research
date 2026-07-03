@@ -11,7 +11,7 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 def optimize_with_mlp(
     model, scaler, x0_np, columns, device="cuda",
-    lr=0.01, steps=300, lambda_reg=0.01,
+    lr=0.01, steps=300, lambda_reg=0.01, epsilon=5,
     fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','wt','bmi','chol','hdl','tg','ldl','ht','wc'],
     clamp_dict = {
     'wk_smk': (0.0, 420.0),
@@ -54,7 +54,7 @@ def optimize_with_mlp(
             x.grad.zero_()
 
         y = model(x)
-        loss = 5*y[:, -1].mean() + lambda_reg * torch.norm(x - x0, p=1)
+        loss = epsilon*y[:, -1].mean() + lambda_reg * torch.norm(x - x0, p=1)
         loss.backward()
 
         with torch.no_grad():
@@ -109,47 +109,8 @@ def get_feature_deltas(
 
     return deltas
 
-def get_rank(deltas):
-    inv = {
-    'wk_smk': (0.0, 420.0),
-    'wk_alc': (0.0, 40.0),
-    'wk_mvpa_play': (0.0, 1470.0),
-    'wk_walk': (10.0, 3780.0),
-    'wk_sleep': (60.0, 1260.0),
-    'stress': (1.0, 4.0),
-    'wk_break': (0.0, 6.0),
-    'wk_lunch': (0.0, 6.0),
-    'wk_dinner': (0.0, 6.0),
-    'wk_veg1': (0.0, 21.0),
-    'wk_veg2': (0.0, 21.0),
-    'wk_fruit': (0.0, 21.0),
-    }
 
-    inv2={}
-    for k,v in deltas.items():
-        min,max=inv[k]
-        prop=v/(max-min) #변수들마다 스케일이 다르므로 정규화시킨다
-        inv2[k]=(v,prop)
-
-    sorted_items = sorted(
-        inv2.items(),
-        key=lambda x: abs(x[1][1]),  # 튜플의 두 번째 원소(비율)
-        reverse=True
-    )
-
-    # rank 추가
-    ranked_deltas = {}
-
-    for rank, (k, (value, ratio)) in enumerate(sorted_items, start=1):
-        ranked_deltas[k] = (value, ratio, rank)
-
-    return ranked_deltas
-
-    
-
-
-
-def compute_total_decision(X,model_paths,scalers):
+def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=300, lambda_reg=0.01, epsilon=5):
 
     total_deltas=[]
     x0 = X.iloc[[0]].values
@@ -166,7 +127,11 @@ def compute_total_decision(X,model_paths,scalers):
             scaler=best_scaler,
             x0_np=x0,
             columns=columns,
-            device=device
+            device=device,
+            lr=lr,
+            steps=steps,
+            epsilon=epsilon,
+            lambda_reg=lambda_reg
         )
 
         deltas = get_feature_deltas(
@@ -186,7 +151,5 @@ def compute_total_decision(X,model_paths,scalers):
         k: np.mean(v).round(2)
         for k, v in mean_deltas.items()
     }
-    
-    #ranked_deltas=get_rank(mean_deltas)
 
     return mean_deltas

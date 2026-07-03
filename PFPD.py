@@ -34,7 +34,6 @@ class PFPD():
         X_opt = X.copy()
 
         for col, delta in deltas.items():
-            #delta=tup[0]
             if col in X_opt.columns:
                 X_opt[col] = X_opt[col] + delta
 
