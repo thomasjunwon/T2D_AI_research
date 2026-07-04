@@ -59,9 +59,9 @@ def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8, mi
     inv = {
         'wk_smk': (0.0, 420.0),
         'wk_alc': (0.0, 40.0),
-        'wk_mvpa_play': (0.0, 1470.0),
-        'wk_walk': (10.0, 3780.0),
-        'wk_sleep': (60.0, 1260.0),
+        'wk_mvpa_play': (0.0, 300.0),
+        'wk_walk': (0.0, 1260.0),
+        'wk_sleep': (360.0, 540.0),
         'stress': (1.0, 4.0),
         'wk_break': (0.0, 6.0),
         'wk_lunch': (0.0, 6.0),

@@ -16,8 +16,8 @@ def optimize_with_mlp(
     clamp_dict = {
     'wk_smk': (0.0, 420.0),
     'wk_alc': (0.0, 40.0),
-    'wk_mvpa_play': (0.0, 1470.0),
-    'wk_walk': (10.0, 3780.0),
+    'wk_mvpa_play': (0.0, 300.0), #mvpa는 최대 300분
+    'wk_walk': (0.0, 1260.0),
     'wk_sleep': (360.0, 540.0),  #constraint
     'stress': (1.0, 4.0),
     'wk_break': (0.0, 6.0),
@@ -54,8 +54,10 @@ def optimize_with_mlp(
         if x.grad is not None:
             x.grad.zero_()
 
-        y = model(x)
-        loss = epsilon*y[:, -1].mean() + lambda_reg * torch.norm(x - x0, p=1)
+        logits = model(x)
+        probs = torch.softmax(logits / 3, dim=1)
+        score = (probs[:, 1] + 2 * probs[:, 2]) * 50
+        loss = epsilon*score.mean() + lambda_reg * torch.norm(x - x0, p=1)
         loss.backward()
 
         with torch.no_grad():
@@ -111,7 +113,7 @@ def get_feature_deltas(
     return deltas
 
 
-def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=300, lambda_reg=0.01, epsilon=5):
+def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=300, lambda_reg=0.5, epsilon=5):
 
     total_deltas=[]
     x0 = X.iloc[[0]].values
