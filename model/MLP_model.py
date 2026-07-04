@@ -34,7 +34,7 @@ class LitModel1(LightningModule):
         super().__init__()
         #dim1=int(dim1)
         self.save_hyperparameters()
-        self.model = MLPModel(28,3,dropout=do)
+        self.model = MLPModel(25,3,dropout=do)
         self.lr = lr
         self.wd=wd
         

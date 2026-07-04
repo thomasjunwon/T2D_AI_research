@@ -11,8 +11,8 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 def optimize_with_mlp(
     model, scaler, x0_np, columns, device="cuda",
-    lr=0.01, steps=300, lambda_reg=0.01, epsilon=5,
-    fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','wt','bmi','chol','hdl','tg','ldl','ht','wc'],
+    lr=0.01, steps=300, lambda_reg=0.5, epsilon=5,
+    fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','bmi','hdl','tg','ldl','wc'],
     clamp_dict = {
     'wk_smk': (0.0, 420.0),
     'wk_alc': (0.0, 40.0),
@@ -30,6 +30,7 @@ def optimize_with_mlp(
 ):
     direction_constraints = {
     "wk_walk": "increase",
+    "wk_mvpa_play":"increase",
     "stress": "decrease",
     "wk_alc": "decrease",
     "wk_smk": "decrease",
@@ -89,7 +90,7 @@ def get_feature_deltas(
     x0,
     x_opt,
     columns,
-    fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','wt','bmi','chol','hdl','tg','ldl','ht','wc'],
+    fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','bmi','hdl','tg','ldl','wc'],
     tol=1e-6
     ):
 

@@ -17,7 +17,7 @@ class PFPD():
         BASE_DIR = Path(__file__).resolve().parent
 
         self.model_paths = [
-            str(BASE_DIR / "model" / "final_checkpoints" / f"fold_{i}" / "best-checkpoint-v4.ckpt")
+            str(BASE_DIR / "model" / "final_checkpoints" / f"fold_{i}" / "best-checkpoint-v6.ckpt")
             for i in range(5)
         ]
 
