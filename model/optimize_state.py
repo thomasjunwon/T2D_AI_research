@@ -1,6 +1,8 @@
 import torch
 import numpy as np
+import pandas as pd
 from model.MLP_model import LitModel1
+from model.progression_scoring import progression_scoring
 
 import torch.cuda
 import torch
@@ -11,7 +13,7 @@ device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 def optimize_with_mlp(
     model, scaler, x0_np, columns, device="cuda",
-    lr=0.01, steps=300, lambda_reg=0.5, epsilon=5,
+    lr=0.01, steps=300, lambda_reg=0.01, epsilon=5,
     fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','bmi','hdl','tg','ldl','wc'],
     clamp_dict = {
     'wk_smk': (0.0, 420.0),
@@ -48,7 +50,7 @@ def optimize_with_mlp(
     for i, c in enumerate(columns):
         if c in fixed_features:
             mask[0, i] = 0.
-
+    
     for _ in range(steps):
 
         if x.grad is not None:
@@ -85,6 +87,7 @@ def optimize_with_mlp(
                     hi = (hi - scaler.mean_[i]) / scaler.scale_[i]
 
                     x[0, i] = torch.clamp(x[0, i], lo, hi)
+            
 
     return scaler.inverse_transform(x.detach().cpu().numpy())
 
@@ -113,11 +116,12 @@ def get_feature_deltas(
     return deltas
 
 
-def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=300, lambda_reg=0.5, epsilon=5):
+def compute_total_decision(X,model_paths,scalers,lr=0.005, steps=400, lambda_reg=0.5, epsilon=5):
 
-    total_deltas=[]
     x0 = X.iloc[[0]].values
     columns = X.columns.tolist()
+    
+    candidate_x_opts = []
 
     for i in range(5):
         best_model = LitModel1.load_from_checkpoint(model_paths[i])
@@ -136,23 +140,28 @@ def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=300, lambda_reg=
             epsilon=epsilon,
             lambda_reg=lambda_reg
         )
+        
+        candidate_x_opts.append(x_opt)
 
-        deltas = get_feature_deltas(
-            x0=x0,
-            x_opt=x_opt,
-            columns=X.columns.tolist()
+    candidate_scores = []
+    
+    for x_opt in candidate_x_opts:
+        x_opt_df = pd.DataFrame(x_opt, columns=columns)
+        score = progression_scoring(
+            x_opt_df,
+            model_paths,
+            scalers
         )
-        total_deltas.append(deltas)
+        candidate_scores.append(float(score))
 
-    mean_deltas = defaultdict(list)
+    best_idx = int(np.argmin(candidate_scores))
+    best_x_opt = candidate_x_opts[best_idx]
+            
 
-    for d in total_deltas:
-        for k, v in d.items():
-            mean_deltas[k].append(v)
+    deltas = get_feature_deltas(
+            x0=x0,
+            x_opt=best_x_opt,
+            columns=columns
+        )
 
-    mean_deltas = {
-        k: np.mean(v).round(2)
-        for k, v in mean_deltas.items()
-    }
-
-    return mean_deltas
+    return deltas
