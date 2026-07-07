@@ -1,7 +1,7 @@
 from model.diagnosing import diagnosing
 from model.optimize_state import compute_total_decision
 from model.progression_scoring import progression_scoring
-
+from model.optimize_state import safety_adjust_delta
 from recommend import prepare_recommendation_items, retrieve_guidelines_for_items
 from llm_writer import generate_patient_recommendation, print_recommendation
 import pandas as pd
@@ -39,9 +39,21 @@ class PFPD():
 
         return X_opt
     
+    def apply_safety_adjustment(self,x, raw_deltas):
+        patient = x.iloc[0].to_dict()
+        adjusted_deltas = {}
+
+        for var, delta in raw_deltas.items():
+            result = safety_adjust_delta(patient, var, float(delta))
+            adjusted_delta = float(result["adjusted_delta"])
+            adjusted_deltas[var] = adjusted_delta
+
+        return adjusted_deltas
+    
     def lifestyle_rec(self,X):
         X3=pd.DataFrame([X])
-        deltas=compute_total_decision(X3,self.model_paths,self.scalers)
+        raw_deltas=compute_total_decision(X3,self.model_paths,self.scalers)
+        deltas = self.apply_safety_adjustment(X3, raw_deltas)
         X_opt=self.apply_deltas(X3,deltas)
         final_score=progression_scoring(X_opt,self.model_paths,self.scalers)
         return deltas, final_score

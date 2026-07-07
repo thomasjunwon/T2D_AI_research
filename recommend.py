@@ -1,60 +1,15 @@
-def safety_adjust_delta(patient: dict, var: str, delta: float):
+def build_recommendation_item(patient: dict, var: str, delta: float):
     current_value = patient.get(var, None)
-
-    adjusted_delta = delta
-
-    if var == "wk_mvpa_play":
-        if delta < 0 or current_value >= 150:
-            adjusted_delta = 0
-    
-    if var == "wk_walk":
-        if delta < 0 or current_value >= 420:  #근거: 하루에 1시간 까지가 이점이 존재한다
-            adjusted_delta = 0
-    
-    if var in ["wk_break", "wk_lunch", "wk_dinner", "wk_fruit"]:
-        if delta < 0:
-            adjusted_delta = 0 
-            
-    if var == "wk_fruit":
-        if current_value >= 14:        #7번보다 많이 먹으면 안된다는 근거?
-            adjusted_delta = 0
-    
-    if var in ["wk_veg1", "wk_veg2"]:
-        if current_value >= 14:
-            adjusted_delta = 0
-    
-    if var =="wk_alc":
-        if abs(delta) < 1:
-            adjusted_delta=0
-            
-    if var == "wk_sleep":
-        if current_value < 360:
-            adjusted_delta = min(60, 360 - current_value)
-        elif current_value > 540:
-            adjusted_delta = max(-60, 540 - current_value)
-        elif 360 <= current_value <= 540:
-            adjusted_delta = 0
-            
-    if var == "wk_smk":
-        if delta < 0:
-            adjusted_delta = -1 
-        else:
-            adjusted_delta = 0
-    
     return {
         "variable": var,
         "original_delta": delta,
-        "adjusted_delta": adjusted_delta,
+        "delta": delta,
         "current_value": current_value,
     }
 
 
-def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8, min_abs_ratio: float = 0.01):
-    """
-    deltas: {"wk_mvpa_play": 50.4, "stress": -2.0, ...}
-    top_k: normalized absolute delta 기준 상위 변수 개수
-    min_abs_ratio: 너무 작은 변화량 제거 기준
-    """
+def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8):
+
 
     inv = {
         'wk_smk': (0.0, 420.0),
@@ -81,10 +36,6 @@ def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8, mi
 
         ratio = delta / scale
 
-        # 너무 작은 변화는 제외
-        if abs(ratio) < min_abs_ratio:
-            continue
-
         ranked.append((var, delta, ratio))
 
     ranked = sorted(
@@ -96,9 +47,9 @@ def prepare_recommendation_items(patient: dict, deltas: dict, top_k: int = 8, mi
     items = []
 
     for rank, (var, delta, ratio) in enumerate(ranked, start=1):
-        item = safety_adjust_delta(patient, var, delta)
+        item = build_recommendation_item(patient, var, delta)
         
-        if item["adjusted_delta"] == 0:
+        if item["delta"] == 0:
             continue
     
         item["ratio"] = ratio
@@ -167,8 +118,8 @@ def retrieve_guidelines_for_items(items, persist_path="./chroma_dia", n_results=
                 "variable": item["variable"],
                 "description": VARIABLE_DESCRIPTION[item["variable"]],
                 "current_value": item["current_value"],
-                "recommended_delta": item["adjusted_delta"],
-                "recommended_value": item["current_value"] + item["adjusted_delta"],
+                "recommended_delta": item["delta"],
+                "recommended_value": item["current_value"] + item["delta"],
             },
             "guidelines": [
                 {
