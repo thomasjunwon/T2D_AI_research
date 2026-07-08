@@ -169,19 +169,7 @@ def safety_adjust_delta(patient: dict, var: str, delta: float):
     current_value = patient.get(var, None)
 
     adjusted_delta = delta
-
-    if var == "wk_mvpa_play":
-        if delta < 0 or current_value >= 150:
-            adjusted_delta = 0
     
-    if var == "wk_walk":
-        if delta < 0 or current_value >= 420:  #근거: 하루에 1시간 까지가 이점이 존재한다
-            adjusted_delta = 0
-    """
-    if var in ["wk_veg1", "wk_veg2"]:
-        if current_value >= 14:
-            adjusted_delta = 0
-    """
     if var =="wk_alc":
         if abs(delta) < 1:
             adjusted_delta=0
@@ -195,22 +183,16 @@ def safety_adjust_delta(patient: dict, var: str, delta: float):
             adjusted_delta = 0
 
     if var == "wk_mvpa_play":
-        if delta < 0 or current_value >= 150:
+        if current_value >= 150:
             adjusted_delta = 0
         else:
             adjusted_delta = min(delta, 150 - current_value)
 
     if var == "wk_walk":
-        if delta < 0 or current_value >= 420:
+        if current_value >= 420:
             adjusted_delta = 0
         else:
-            adjusted_delta = min(delta, 420 - current_value)
-            
-    if var == "wk_smk":
-        if delta < 0:
-            adjusted_delta = -1 
-        else:
-            adjusted_delta = 0
+            adjusted_delta = min(delta, 420-current_value)
     
     return {
         "variable": var,

@@ -22,10 +22,16 @@ For each action item, copy the variable name exactly as provided in the recommen
 When you write recommendation based on delta, use the delta value of variable with patient-friendly language.
 If the recommended value is not an integer, express it naturally (e.g., "about 4-5 times per week" or "approximately 8 hours") instead of reporting the exact decimal value.
 Do not express activity changes as fold changes. Use absolute minutes per week and the recommended target value only.
-When you write rationale, cite the reference("text") guidelines explicitly, and specifically. Do not specify where is the guideline came from (reference) when you write rationale.  
+When writing the rationale, base every statement explicitly on the retrieved guideline text. Do not introduce unsupported medical claims or cite the guideline source by name.
 If multiple guideline texts are retrieved for the same variable, integrate all relevant information into the recommendation. Present each guideline in a separate sentence while maintaining a natural flow.
-For smoking recommendations, ignore the numeric value of the adjusted delta. If the adjusted delta is negative, recommend reducing smoking and working toward complete smoking cessation.
-For alcohol recommendations, do not recommend complete abstinence unless the model-derived recommended value is exactly 0 and the current intake is clearly high. Prefer wording such as "reduce alcohol intake" or "stay within recommended limits" rather than "reduce to zero cups."
+For smoking recommendations, ignore the numeric value of the delta. If the delta is negative, recommend reducing smoking and working toward complete smoking cessation.
+For alcohol recommendations, avoid recommending complete abstinence unless clearly warranted. Prefer wording such as "reduce alcohol intake" or "stay within recommended limits" over rigid numerical targets whenever appropriate.
+For walking recommendations:If the recommended walking target is substantially higher than the patient's current walking time, recommend increasing walking gradually rather than immediately reaching the target.
+
+For meal-related variables (breakfast, lunch, and dinner), never recommend skipping regular meals or reducing meal frequency to clinically unreasonable levels. If the model-derived target suggests reducing meal frequency, reinterpret the recommendation using the retrieved guideline content rather than explicitly recommending fewer meals.
+For fruit intake, never recommend eliminating fruit consumption. If the model-derived target suggests a lower intake, express the recommendation in accordance with the retrieved guideline content rather than avoiding fruit entirely.
+Avoid recommending target values that are unrealistic for immediate implementation. When the suggested increase is large, describe it as a gradual progression toward the target rather than an immediate change.
+When the model-derived target and the retrieved guideline appear inconsistent, prioritize the retrieved guideline when generating patient-facing recommendations while preserving the overall intended direction of lifestyle modification.
 """
 
     user_payload = {
