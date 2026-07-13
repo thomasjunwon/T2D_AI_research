@@ -115,7 +115,7 @@ def get_feature_deltas(
     return deltas
 
 
-def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=400, lambda_reg=0.5, epsilon=5):
+def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=400, lambda_reg=0.2, epsilon=5):
 
     x0 = X.iloc[[0]].values
     columns = X.columns.tolist()

@@ -3,7 +3,7 @@
     "id": "ada_mvpa_001",
     "variable": "wk_mvpa_play",
     "reference": "The diabetes prevention program, section 3, ADA Standards of Care (2026)",
-    "text":"At least 150 minutes per week of moderate-intensity physical activity is recommended for diabetes prevention. Participants were encouraged to distribute physical activity throughout the week with a minimum frequency of three times per week and at least 10 min per session. Physical activity should produce a 700 kcal/week energy deficit to reduce body weight. In addition to aerobic activity, a physical activity plan designed to prevent diabetes can include resistance training. Breaking up prolonged sedentary time may also be encouraged, as it lowers postprandial glucose levels."
+    "text":"At least 150 minutes per week of moderate-intensity physical activity is recommended for diabetes prevention. Participants were encouraged to distribute physical activity throughout the week with a minimum frequency of three times per week and at least 10 min per session. The DPP lifestyle intervention was designed to produce a 700 kcal/week energy deficit to support weight loss. In addition to aerobic activity, a physical activity plan designed to prevent diabetes can include resistance training. Breaking up prolonged sedentary time may also be encouraged, as it lowers postprandial glucose levels.."
   },
   {
     "id": "ada_walk_001",
@@ -33,7 +33,7 @@
     "id": "ada_sleep_001",
     "variable": "wk_sleep",
     "reference": "Sleep Characteristics Associated With Increased Risk of Type 2 Diabetes, section 3, ADA Standards of Care (2026)",
-    "text": "Sleep can be characterized using three key constructs: quantity, quality, and timing. For association between sleep duration and diabetes incidence, with 7 h per day has the lowest incidence, with short (typically defined as <6 h) and long (typically defined as >9 h) sleep duration having up to a high risk of type 2 diabetes. Poor overall sleep quality was associated with high risk of developing diabetes. Individuals with a preference for evenings (i.e., going to bed late and getting up late), there was a higher risk for diabetes than for those with a preference for mornings"
+    "text": "Sleep can be characterized using three key constructs: quantity, quality, and timing. Regarding the association between sleep duration and diabetes incidence, approximately 7 h per day was associated with the lowest incidence, whereas short sleep duration (typically defined as <6 h) and long sleep duration (typically defined as >9 h) were associated with a higher risk of type 2 diabetes. Poor overall sleep quality was associated with high risk of developing diabetes. Individuals with a preference for evenings (i.e., going to bed late and getting up late), there was a higher risk for diabetes than for those with a preference for mornings"
   },
   {
     "id": "ada_smk_001",
@@ -87,13 +87,13 @@
     "id": "ada_veg1_001",
     "variable": "wk_veg1", 
     "reference": "Medical Nutrition Therapy, section 5, ADA Standards of Care (2026)",
-    "text": "Especially nonstarchy vegetables that are dark green, red, and orange in color; fresh, frozen, or low-sodium canned are all acceptable vegetable options."
+    "text": "Especially nonstarchy vegetables that are dark green, red, and orange in color; fresh, frozen, or low-sodium canned are all acceptable vegetable options. When consuming pickled vegetables such as kimchi, choose lower-sodium options whenever possible."
   },
   {
     "id": "ada_veg2_001",
     "variable": "wk_veg2", 
     "reference": "Medical Nutrition Therapy, section 5, ADA Standards of Care (2026)",
-    "text": "Especially nonstarchy vegetables that are dark green, red, and orange in color; fresh, frozen, or low-sodium canned are all acceptable vegetable options. When consuming pickled vegetables such as kimchi, choose lower-sodium options whenever possible."
+    "text": "Especially nonstarchy vegetables that are dark green, red, and orange in color; fresh, frozen, or low-sodium canned are all acceptable vegetable options."
   },
   {
     "id": "ada_fruit_001",
@@ -105,10 +105,10 @@
     "id": "ada_stress_001",
     "variable": "stress", 
     "reference": "Psychological Care, section 5, ADA Standards of Care (2026)",
-    "text": "Diabetes stress, anxiety, and depression should be controlled in prediabetes patients, since they can significantly increase the A1C level and decrease the quality of life."
+    "text": "Psychological stress, anxiety, and depressive symptoms should be assessed and addressed in individuals with prediabetes, as they have been associated with higher A1C levels and reduced quality of life."
   },
   {
-    "id": "ada_stress_002",
+    "id": "cdc_stress_001",
     "variable": "stress", 
     "reference": "Diabetes and Mental Health (2024), Centers for Disease Control and Prevention",
     "text": "Getting active. Even a quick walk can be calming, and the effect can last for hours. Doing some relaxation exercises, like meditation or yoga. Calling or texting a friend who understands you (not someone who is causing you stress!). Grabbing some 'your' time. Take a break from whatever you're doing. Go outside, read something fun—whatever helps you recharge. Taking care of yourself. Limit alcohol and caffeine, eat healthy food, and get enough sleep."
