@@ -3,7 +3,7 @@
     "id": "ada_mvpa_001",
     "variable": "wk_mvpa_play",
     "reference": "The diabetes prevention program, section 3, ADA Standards of Care (2026)",
-    "text":"At least 150 minutes per week of moderate-intensity physical activity is recommended for diabetes prevention. Participants were encouraged to distribute physical activity throughout the week with a minimum frequency of three times per week and at least 10 min per session. The DPP lifestyle intervention was designed to produce a 700 kcal/week energy deficit to support weight loss. In addition to aerobic activity, a physical activity plan designed to prevent diabetes can include resistance training. Breaking up prolonged sedentary time may also be encouraged, as it lowers postprandial glucose levels.."
+    "text":"At least 150 minutes per week of moderate-intensity physical activity is recommended for diabetes prevention. Participants were encouraged to distribute physical activity throughout the week with a minimum frequency of three times per week and at least 10 min per session. The DPP lifestyle intervention was designed to produce a 700 kcal/week energy deficit to support weight loss. In addition to aerobic activity, a physical activity plan designed to prevent diabetes can include resistance training. Breaking up prolonged sedentary time may also be encouraged, as it lowers postprandial glucose levels."
   },
   {
     "id": "ada_walk_001",
@@ -33,7 +33,7 @@
     "id": "ada_sleep_001",
     "variable": "wk_sleep",
     "reference": "Sleep Characteristics Associated With Increased Risk of Type 2 Diabetes, section 3, ADA Standards of Care (2026)",
-    "text": "Sleep can be characterized using three key constructs: quantity, quality, and timing. Regarding the association between sleep duration and diabetes incidence, approximately 7 h per day was associated with the lowest incidence, whereas short sleep duration (typically defined as <6 h) and long sleep duration (typically defined as >9 h) were associated with a higher risk of type 2 diabetes. Poor overall sleep quality was associated with high risk of developing diabetes. Individuals with a preference for evenings (i.e., going to bed late and getting up late), there was a higher risk for diabetes than for those with a preference for mornings"
+    "text": "Sleep can be characterized using three key constructs: quantity, quality, and timing. Regarding the association between sleep duration and diabetes incidence, approximately 7 h per day was associated with the lowest incidence, whereas short sleep duration (typically defined as <6 h) and long sleep duration (typically defined as >9 h) were associated with a higher risk of type 2 diabetes. Poor overall sleep quality was associated with high risk of developing diabetes. Individuals with a preference for evenings (i.e., going to bed late and getting up late), there was a higher risk for diabetes than for those with a preference for mornings."
   },
   {
     "id": "ada_smk_001",

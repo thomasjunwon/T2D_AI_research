@@ -132,9 +132,6 @@ def get_feature_deltas(
         lo, hi = clamp_dict[col]
         scale = hi - lo
 
-        if scale <= 0:
-            continue
-
         normalized_change = abs(diff) / scale
 
         if normalized_change < min_abs_ratio:
@@ -145,7 +142,7 @@ def get_feature_deltas(
     return deltas
 
 
-def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=400, lambda_reg=0.2, epsilon=5):
+def compute_total_decision(X,model_paths,scalers,lr=0.01, steps=400, lambda_reg=0.1, epsilon=5):
 
     x0 = X.iloc[[0]].values
     columns = X.columns.tolist()
