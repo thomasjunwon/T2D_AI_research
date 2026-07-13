@@ -86,6 +86,7 @@ def optimize_with_mlp(
                     hi = (hi - scaler.mean_[i]) / scaler.scale_[i]
 
                     x[0, i] = torch.clamp(x[0, i], lo, hi)
+                    
             
 
     return scaler.inverse_transform(x.detach().cpu().numpy())
@@ -95,8 +96,24 @@ def get_feature_deltas(
     x_opt,
     columns,
     fixed_features=['sex','age','edu','income','job','glu','hba1c','sbp','bmi','hdl','tg','ldl','wc'],
-    tol=1e-6
+    tol=1e-6,
+    min_abs_ratio=0.01
     ):
+    
+    clamp_dict = {
+    'wk_smk': (0.0, 420.0),
+    'wk_alc': (0.0, 40.0),
+    'wk_mvpa_play': (0.0, 300.0), #mvpa는 최대 300분
+    'wk_walk': (0.0, 1260.0),
+    'wk_sleep': (360.0, 540.0),  #constraint
+    'stress': (1.0, 4.0),
+    'wk_break': (0.0, 6.0),
+    'wk_lunch': (0.0, 6.0),
+    'wk_dinner': (0.0, 6.0),
+    'wk_veg1': (0.0, 21.0),
+    'wk_veg2': (0.0, 21.0),
+    'wk_fruit': (0.0, 21.0),
+    }
 
     x0 = np.array(x0).reshape(-1)
     x_opt = np.array(x_opt).reshape(-1)
@@ -109,8 +126,21 @@ def get_feature_deltas(
 
         diff = x_opt[i] - x0[i]
 
-        if abs(diff) > tol:
-            deltas[col] = float(diff)
+        if abs(diff) <= tol:
+            continue
+        
+        lo, hi = clamp_dict[col]
+        scale = hi - lo
+
+        if scale <= 0:
+            continue
+
+        normalized_change = abs(diff) / scale
+
+        if normalized_change < min_abs_ratio:
+            continue
+
+        deltas[col] = diff
 
     return deltas
 

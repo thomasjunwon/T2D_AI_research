@@ -28,7 +28,7 @@ For smoking recommendations, ignore the numeric value of the delta. If the delta
 For alcohol recommendations, avoid recommending complete abstinence unless clearly warranted. Prefer wording such as "reduce alcohol intake" or "stay within recommended limits" over rigid numerical targets whenever appropriate.
 For walking recommendations:If the recommended walking target is substantially higher than the patient's current walking time, recommend increasing walking gradually rather than immediately reaching the target.
 
-For meal-related variables (breakfast, lunch, and dinner), never recommend skipping regular meals or reducing meal frequency to clinically unreasonable levels. If the model-derived target suggests reducing meal frequency, reinterpret the recommendation using the retrieved guideline content rather than explicitly recommending fewer meals.
+For meal related variables (breakfast, lunch, and dinner), do not recommend reducing meal frequency as a target. If the target suggests reducing meal frequency, reinterpret the recommendation using the retrieved guideline content.
 For fruit intake, never recommend eliminating fruit consumption. If the model-derived target suggests a lower intake, express the recommendation in accordance with the retrieved guideline content rather than avoiding fruit entirely.
 Avoid recommending target values that are unrealistic for immediate implementation. When the suggested increase is large, describe it as a gradual progression toward the target rather than an immediate change.
 When the model-derived target and the retrieved guideline appear inconsistent, prioritize the retrieved guideline when generating patient-facing recommendations while preserving the overall intended direction of lifestyle modification.
